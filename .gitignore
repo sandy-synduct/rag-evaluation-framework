@@ -1,0 +1,44 @@
+# Virtual Environment
+venv/
+.env
+*.env
+
+# Python Bytecode
+__pycache__/
+eval_report/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs and Debug Files
+*.log
+*.out
+*.err
+
+# Data and Index Files (FAISS, Numpy, JSON, CSV)
+*.npy
+*.npz
+*.index
+*.h5
+*.csv
+*.tsv
+*.json
+
+
+# Model Checkpoints
+*.pth
+*.pt
+*.hdf5
+*.ckpt
+*.onnx
+
+# Jupyter Notebook Checkpoints
+.ipynb_checkpoints/
+
+# VS Code and IDE Configs
+.vscode/
+.idea/
+
+# MacOS & System Files
+.DS_Store
+Thumbs.db

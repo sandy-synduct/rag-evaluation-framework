@@ -1,0 +1,74 @@
+Task: Evaluate a generated summary against its source search results and a user query.  Your evaluation will focus on three key aspects: Hallucination, Summary Quality, and Answer Relevancy.
+User Query: {user_query_placeholder}
+Input: You will be given a JSON object containing:
+
+search_results: An array of search result objects. Each object will have:
+url: The URL of the search result.
+content: The text content of the search result.
+metadata: Metadata about the search result (e.g., title, source type).
+summary: The generated summary text.
+search_query: The original query that prompted the search and summary generation.
+citations: citations used in the summary from the sources
+Output:  Your evaluation should be structured as a JSON object with the following keys:
+
+hallucination_evaluation: A JSON object containing the hallucination evaluation results.
+summary_quality_evaluation: A JSON object containing the summary quality evaluation results.
+answer_relevancy_evaluation: A JSON object containing the answer relevancy evaluation results also with the title of the publication with url embedded and citation number as [x].
+Detailed Evaluation Steps:
+
+1. Hallucination Evaluation:
+
+Objective: Determine if the generated summary contains any hallucinations. Hallucinations, in this context, are defined as factual statements in the summary that are not supported by the content of the provided search_results.
+Process:
+Carefully read the summary.
+For each factual statement in the summary, check if that information is explicitly mentioned or logically inferable from at least one of the texts (content) in the search_results.
+Focus on factual claims, not on stylistic choices, organization, or phrasing, as long as the core factual information is present in the source texts.
+Output for hallucination_evaluation: Create a JSON object with the following keys:
+hallucination_score: Assign a score for hallucination based on the following scale:
+0 - None: No hallucinations detected. All factual statements are supported by the search results.
+1 - Minor: Very few (1-2 minor) factual statements are questionable or weakly supported by the search results, but they don't significantly distort the overall meaning.
+2 - Moderate: Several (3-5) factual statements are not clearly supported by the search results and might slightly distort the understanding of the topic.
+3 - High: Many (more than 5) or significant factual statements in the summary are not supported by the search results, significantly undermining the summary's accuracy and reliability.
+hallucination_justification: Provide a brief justification for the assigned hallucination_score. If hallucinations are detected (score > 0), specifically mention which statements are problematic and why they are considered hallucinations (i.e., which search result text contradicts or does not support them). If no hallucinations are found (score = 0), state that all claims are supported by the provided texts and optionally mention key texts that support the summary's main points.
+
+2. Summary Quality Evaluation:
+
+Objective: Assess the quality of the summary based on how well it captures and answers potential questions arising from the search_results.
+Process:
+For each text in the search_results:
+Generate more than 5 questions that are based on the key information within that specific search result text (content). These questions should be about factual information, concepts, or claims made in that text and importantly clinically relevant (don't use which publisher or any generic be specific and relevant  clincially). Try to ask questions that a good summary should ideally answer.
+Carefully examine the summary to see if it provides answers to each of the generated questions. A question is considered "answered" if the summary provides information that directly or indirectly addresses the question, even if not in the exact same words.
+Count the total number of questions generated across all search results.
+Count the number of generated questions that are answered (or partially answered) in the summary.
+Calculate the summary_quality_score as: (Number of Answered Questions / Total Number of Questions) * 100. Round to the nearest whole number, or represent as a percentage.
+Output for summary_quality_evaluation: Create a JSON object with the following keys:
+summary_quality_score: The calculated summary quality score (e.g., "80%", or 8 out of 10 if you prefer a fractional representation initially, then convert to percentage for the final JSON).
+questions_and_answers: An array of JSON objects. Each object in the array should represent a search result text and the questions generated for it, along with whether the summary answered them. For each search result text, include:
+text_url: The url of the search result text.
+questions: An array of JSON objects, where each object is a question and its answer status:
+question: The generated question text.
+is_answered: A boolean value (true or false) indicating if the summary answers the question.
+answer_justification (optional): Briefly justify why you marked the question as answered or not answered. You can mention sentences in the summary that provide the answer or explain why the summary misses the information.
+
+3. Answer Relevancy Evaluation:
+
+Objective: Determine how relevant the generated summary is to the original user_query.
+Process:
+Read the user_query carefully.
+Evaluate if the summary directly addresses the user_query. Consider:
+Does the summary answer the core question(s) posed in the user_query?
+Does the summary provide information that is helpful and pertinent to someone asking the user_query?
+Identify the most relevant search_results texts that contribute to answering the user_query and are reflected in the summary.
+Output for answer_relevancy_evaluation: Create a JSON object with the following keys:
+relevancy_score: Assign a relevancy score based on the following scale:
+3 - Highly Relevant: The summary directly and comprehensively answers the user query. It provides all the key information requested and is highly useful.
+2 - Relevant: The summary answers the user query adequately, but might be missing some details or could be more focused. It's generally helpful.
+1 - Partially Relevant: The summary touches upon topics related to the user query, but doesn't fully answer it or misses key aspects. It's of limited help in directly answering the query.
+0 - Not Relevant: The summary is not relevant to the user query at all. It discusses a different topic or provides information unrelated to what the user asked.
+relevancy_justification: Provide a brief justification for the assigned relevancy_score. Explain why you rated the relevancy as you did, highlighting specific aspects of the summary that make it relevant (or not relevant) to the user_query.
+relevant_search_result_urls: An array of URLs of the search_results texts that you identified as most relevant to answering the user_query in the summary
+
+Here is the user_query: {user_query_placeholder}
+Here is the json object: {json_data_placeholder}
+
+As an important note when ever you mention something cite them as url source with title so its easy to refer.
