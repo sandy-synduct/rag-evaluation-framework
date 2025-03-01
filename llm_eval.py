@@ -8,7 +8,7 @@ import markdown
 import pdfkit
 import pypandoc
 
-genai.configure(api_key="AIzaSyC6poJIkQqz9_Pb4POYoyR4MKLYesFM7yY")
+genai.configure(api_key="AIzaSyBMbbqL-DgamRfyEGU5GB02ciGnlQh_zGY")
 model = genai.GenerativeModel('gemini-2.0-flash-exp')
 with open('eval_prompt.txt','r') as f:
     prompt = f.read()

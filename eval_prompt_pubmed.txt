@@ -1,0 +1,92 @@
+Task:
+Evaluate a generated summary against its user query and ground truth summary answers. Your evaluation will focus on four key aspects: Hallucination, LLM Summary Quality, LLM Answer Relevancy, and Final Decision.
+
+User Query:
+{user_query_placeholder}
+
+Input:
+You will be given a JSON object containing:
+
+- search_results: An array of search result objects. Each object will have:
+  - url: The URL of the search result.
+  - content: The text content of the search result.
+  - metadata: Metadata about the search result (e.g., title, source type).
+  - summary: The generated summary text.
+  - search_query: The original query that prompted the search and summary generation.
+  - citations: Citations used in the summary from the sources.
+
+Output:
+Your evaluation should be structured as a JSON object with the following four keys, all normalized in the range **0 to 1**:
+
+1. hallucination_score
+Objective: Determine if the generated summary contains any hallucinations. Hallucinations, in this context, are factual statements in the summary that are not supported by the content of the provided search_results.
+
+Process:
+- Carefully read the summary.
+- For each factual statement in the summary, check if that information is explicitly mentioned or logically inferable from at least one of the texts (content) in the search_results.
+- Focus on factual claims, not on stylistic choices, organization, or phrasing, as long as the core factual information is present in the source texts.
+
+Scoring (Normalized to 0-1):
+- 0.00 – No hallucinations detected. All factual statements are supported by the search results.
+- 0.33 – Minor hallucinations (1-2 questionable or weakly supported statements).
+- 0.67 – Moderate hallucinations (3-5 statements not clearly supported, slightly distorting meaning).
+- 1.00 – High hallucination level (more than 5 unsupported statements, significantly undermining summary reliability).
+
+2. summary_quality_score
+Objective: Assess how well the summary captures and answers clinically relevant questions derived from the search results.
+
+Process:
+- For each text in the search_results, generate more than 5 clinically relevant questions based on key factual information within that text. These questions should be about core concepts, findings, or claims made in that text. Do not include generic or irrelevant questions (e.g., publisher details).
+- Carefully examine the summary to check if it provides answers to these questions. A question is considered "answered" if the summary directly or indirectly addresses it, even if phrased differently.
+- Count the total number of questions generated across all search results.
+- Count the number of generated questions that are answered (or partially answered) in the summary.
+- Calculate the score as:
+  summary_quality_score = (Number of Answered Questions / Total Number of Questions)
+  Normalize the score to a range of **0 to 1**.
+
+3. answer_relevancy_score
+Objective: Determine how relevant the generated summary is to the original user_query.
+
+Process:
+- Read the user_query carefully.
+- Evaluate if the summary directly addresses the user_query. Consider:
+  - Does the summary fully answer the core question(s) posed in the user_query?
+  - Does the summary provide clinically useful information that a person asking the user_query would find helpful?
+- Identify the most relevant search_results that contribute to answering the user_query and check if they are reflected in the summary.
+
+Scoring (Normalized to 0-1):
+- 1.00 – Highly Relevant: The summary directly and comprehensively answers the user query. It provides all the key information requested and is highly useful.
+- 0.67 – Relevant: The summary answers the query adequately but might be missing some details or could be more focused. It is generally helpful.
+- 0.33 – Partially Relevant: The summary touches upon related topics but does not fully answer the query or misses key aspects. It provides limited help.
+- 0.00 – Not Relevant: The summary is not relevant to the user query at all. It discusses a different topic or provides information unrelated to what the user asked.
+
+4. final_decision
+Objective: Provide a yes/no decision based on whether the summary supports or contradicts the user query.
+
+Process:
+- If the summary supports the claim made in the query, return yes.
+- If the summary contradicts or does not support the claim, return no.
+
+Example:
+User Query: Are lipoprotein phospholipase A2 mass and activity associated with the diagnosis of acute brain ischemia?
+Summary: The results of our study do not support the early measurement of Lp-PLA2 mass or activity levels for confirming an ischemic etiology in patients experiencing minor or transient focal neurological events.
+Final Decision: 0.0
+
+Follow this output structure:
+```json
+
+  "hallucination_score": 0.33,
+  "summary_quality_score": 0.85,
+  "answer_relevancy_score": 0.67,
+  "final_decision": yes or no 
+
+```
+
+Important Note: If you find the summary field to be empty: or Error processing please don't evaluate them. 
+Just leave they output json with the keys with None or empty.
+
+Here is the user_query:
+{user_query_placeholder}
+
+Here is the JSON object:
+{json_data_placeholder}
